@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Configuration
-XML_DIR = "data"  # Directory where you extracted Posts.xml, Users.xml, Tags.xml
+XML_DIR = os.path.join("data","ai.stackexchange.com")  # Directory where you extracted Posts.xml, Users.xml, Tags.xml
 BATCH_SIZE = 1000 # Number of records to commit at once
 
 # Neo4j Connection
@@ -84,14 +84,14 @@ def ingest_posts():
         q.body = row.Body,
         q.score = toInteger(row.Score),
         q.creation_date = row.CreationDate
-    
-    # Link Owner
+
+    // Link Owner
     WITH q, row
     WHERE row.OwnerUserId IS NOT NULL
     MATCH (u:User {id: toInteger(row.OwnerUserId)})
     MERGE (u)-[:ASKED]->(q)
-    
-    # Link Tags
+
+    // Link Tags
     WITH q, row
     UNWIND row.tags_list AS tag_name
     MERGE (t:Tag {name: tag_name})
@@ -105,13 +105,13 @@ def ingest_posts():
     SET a.body = row.Body,
         a.score = toInteger(row.Score),
         a.is_accepted = (row.Id = row.AcceptedAnswerId)
-    
-    # Link to Question
+
+    // Link to Question
     WITH a, row
     MATCH (q:Question {id: toInteger(row.ParentId)})
     MERGE (a)-[:ANSWERS]->(q)
-    
-    # Link Owner
+
+    // Link Owner
     WITH a, row
     WHERE row.OwnerUserId IS NOT NULL
     MATCH (u:User {id: toInteger(row.OwnerUserId)})
@@ -154,21 +154,6 @@ def ingest_posts():
         
     print(f"\n✅ Finished {count} Posts.")
 # Updated ingest.py snippets for Tags and Comments
-
-def ingest_tags():
-    """Ingests Tags.xml to get Tag descriptions."""
-    xml_path = os.path.join(XML_DIR, "Tags.xml")
-    if not os.path.exists(xml_path): return
-
-    print("📥 Ingesting Tags...")
-    query = """
-    UNWIND $batch AS row
-    MERGE (t:Tag {name: row.TagName})
-    SET t.count = toInteger(row.Count),
-        t.excerpt_id = toInteger(row.ExcerptPostId)
-    """
-    # ... (batch logic similar to users)
-    print("✅ Finished Tags.")
 
 def ingest_comments():
     """Ingests Comments.xml and links them to Posts."""
@@ -215,5 +200,4 @@ if __name__ == "__main__":
     clear_database()
     ingest_users()
     ingest_posts()
-    ingest_tags()
     ingest_votes()

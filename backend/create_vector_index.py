@@ -1,37 +1,34 @@
 import os
 from dotenv import load_dotenv
-from langchain_community.graphs import Neo4jGraph
-from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import Neo4jVector
+from langchain_huggingface import HuggingFaceEmbeddings
 
 load_dotenv()
 
-# Setup Environment
-url = os.getenv("NEO4J_URI")
-username = os.getenv("NEO4J_USERNAME")
-password = os.getenv("NEO4J_PASSWORD")
-openai_api_key = os.getenv("OPENAI_API_KEY")
+URI = os.getenv("NEO4J_URI")
+USER = os.getenv("NEO4J_USERNAME")
+PASSWORD = os.getenv("NEO4J_PASSWORD")
 
-def create_index():
-    print("🧠 Initializing Vector Indexing...")
+def create_local_index():
+    print("🧠 Loading Model: all-MiniLM-L6-v2...")
+    embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
 
-    # We use OpenAI Embeddings to convert text to vectors
-    embeddings = OpenAIEmbeddings(openai_api_key=openai_api_key)
-
-    # This command connects to Neo4j, looks for 'Question' nodes,
-    # takes their 'title' and 'body', embeds them, and creates an index named "question_index"
+    print("🧠 Creating Index in Neo4j (this maps Vectors to Question IDs)...")
+    
+    # We index 'title' and 'body'. 
+    # Importantly, we include 'id' in text_node_properties so retrieval is O(1)
     Neo4jVector.from_existing_graph(
         embedding=embeddings,
-        url=url,
-        username=username,
-        password=password,
+        url=URI,
+        username=USER,
+        password=PASSWORD,
         index_name="question_index",
         node_label="Question",
-        text_node_properties=["title", "body"], # What fields to read
-        embedding_node_property="embedding",    # Where to store the vector
+        text_node_properties=["title", "body", "id"], 
+        embedding_node_property="embedding",
     )
     
-    print("✅ Vector Index 'question_index' created successfully!")
+    print("✅ Local Vector Index created successfully!")
 
 if __name__ == "__main__":
-    create_index()
+    create_local_index()

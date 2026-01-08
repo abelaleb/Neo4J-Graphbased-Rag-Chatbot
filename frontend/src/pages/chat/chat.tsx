@@ -43,12 +43,13 @@ export function Chat() {
       // Make the API call to your FastAPI backend
       const response = await axios.post(
         apiUrl,
-        { query: messageText }
+        { question: messageText }
       );
 
       // Extract the final answer from the backend's JSON response
-      let botAnswer = response.data.response;
-      const intermediateSteps = response.data.context_used;
+      // Backend currently returns { input, output, intermediate_steps }
+      let botAnswer = response.data.output;
+      const intermediateSteps = response.data.intermediate_steps;
 
       // Check if the response contains the specific error message
       if (botAnswer === "Agent stopped due to iteration limit or time limit.") {

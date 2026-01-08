@@ -206,6 +206,12 @@ async def generate_query(request: QueryRequest):
         logger.error(f"Agent execution failed: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Internal server error processing request")
 
+
+@app.post("/chat")
+async def chat_endpoint(request: QueryRequest):
+    """Alias endpoint so frontend can POST /chat with the same payload as /api/generate-query."""
+    return await generate_query(request)
+
 # 10. Execution
 if __name__ == '__main__':
     import uvicorn

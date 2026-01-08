@@ -1,0 +1,7 @@
+Category,Question,Expected Keywords,Actual Output,Latency (s),Correct
+Simple Fact,What team does LeBron James play for?,"Lakers, Los Angeles",I cannot answer the question with the available data.,4.2587,False
+Simple Fact,What position does Stephen Curry play?,"Guard, G",I cannot answer the question as the information is not available in the database.,2.7146,False
+Multi-hop / Relationship,Which conference is the team Miami Heat in?,"East, Eastern",The Miami Heat is in the East conference.,66.5679,True
+Numerical / Stats,What is the jersey number of Luka Doncic?,77,I cannot answer the question as the jersey number of Luka Doncic is not available in the database.,4.8999,False
+Negative Test (Missing Info),What team does Michael Jordan play for right now?,"not, no information, retired, cannot answer",I cannot answer the question as the information about which team Michael Jordan plays for right now is not available in the database.,3.396,True
+Calculation,What is 25 plus 30?,55,Error: Status Code 500,0.0,False

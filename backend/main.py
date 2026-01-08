@@ -42,7 +42,7 @@ class QueryRequest(BaseModel):
     question: str
 
 # 5. Initialize LLM
-llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash-lite", temperature=0)
+llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", temperature=0)
 
 # 6. Robust Neo4j Connection Handling
 def get_neo4j_graph():

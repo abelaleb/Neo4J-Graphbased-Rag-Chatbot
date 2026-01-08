@@ -37,17 +37,18 @@ export function Chat() {
 
     try {
       // Build the API URL dynamically based on the environment
-      const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/api/generate-query`;
+      // Make sure VITE_API_BASE_URL points to your FastAPI server (e.g. http://localhost:8000)
+      const apiUrl = `${import.meta.env.VITE_API_BASE_URL}/chat`;
 
-      // Make the API call to your Flask backend
+      // Make the API call to your FastAPI backend
       const response = await axios.post(
         apiUrl,
-        { question: messageText }
+        { query: messageText }
       );
 
       // Extract the final answer from the backend's JSON response
-      let botAnswer = response.data.output;
-      const intermediateSteps = response.data.intermediate_steps;
+      let botAnswer = response.data.response;
+      const intermediateSteps = response.data.context_used;
 
       // Check if the response contains the specific error message
       if (botAnswer === "Agent stopped due to iteration limit or time limit.") {

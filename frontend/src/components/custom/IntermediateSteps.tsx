@@ -7,6 +7,8 @@ interface Step {
         tool_input: string;
         log: string;
     };
+    
+/*eslint-disable-next-line*/
     observation: any;
 }
 
@@ -20,6 +22,7 @@ export function IntermediateSteps({ steps, finalAnswer }: IntermediateStepsProps
         return null;
     }
 
+/*eslint-disable-next-line*/
     const renderObservation = (observation: any) => {
         if (typeof observation === 'string') {
             return <p className="text-sm text-muted-foreground">{observation}</p>;
@@ -28,6 +31,8 @@ export function IntermediateSteps({ steps, finalAnswer }: IntermediateStepsProps
         if (observation.intermediate_steps) {
             return (
                 <div className="space-y-2">
+
+                
                     {observation.intermediate_steps.map((subStep: any, index: number) => (
                         <div key={index}>
                             {subStep.query && (

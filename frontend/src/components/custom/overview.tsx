@@ -4,12 +4,13 @@ import { BotIcon, MessageCircle } from 'lucide-react';
 import { SiNeo4J } from "react-icons/si";
 
 const templateQuestions = [
-  "Who is the coach of the LA Lakers?",
-  "List all players on the Brooklyn Nets.",
-  "Is James Harden a teammate of Kevin Durant?",
-  "Who are the teammates of the players coached by Doc Rivers?",
-  "what is the age difference between Luka Doncic and LeBron James?",
-  "How many points did Ja Morant score against the Lakers?",
+  "Who is Luka Dončić and what position does he play?",
+  "Which team does LeBron James currently play for?",
+  "List some players on the Brooklyn Nets.",
+  "How tall is Kevin Durant?",
+  "Compare the height of Luka Dončić and LeBron James.",
+  "Find players who play as point guards.",
+  "What are the recent game statistics for Giannis Antetokounmpo?",
 ];
 
 interface OverviewProps {

@@ -1,10 +1,25 @@
 import { memo } from "react";
+import type React from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
+type WithChildren<T> = T & { children?: React.ReactNode };
+
+type CodeProps = WithChildren<React.HTMLAttributes<HTMLElement>> & {
+  inline?: boolean;
+  className?: string;
+};
+
+type OlProps = WithChildren<React.OlHTMLAttributes<HTMLOListElement>>;
+type LiProps = WithChildren<React.LiHTMLAttributes<HTMLLIElement>>;
+type UlProps = WithChildren<React.HTMLAttributes<HTMLUListElement>>;
+type StrongProps = WithChildren<React.HTMLAttributes<HTMLSpanElement>>;
+type AnchorProps = WithChildren<React.AnchorHTMLAttributes<HTMLAnchorElement>>;
+type HeadingProps = WithChildren<React.HTMLAttributes<HTMLHeadingElement>>;
+
 const NonMemoizedMarkdown = ({ children }: { children: string }) => {
   const components = {
-    code: ({ node, inline, className, children, ...props }: any) => {
+    code: ({ inline, className, children, ...props }: CodeProps) => {
       const match = /language-(\w+)/.exec(className || "");
       return !inline && match ? (
         <pre
@@ -22,35 +37,35 @@ const NonMemoizedMarkdown = ({ children }: { children: string }) => {
         </code>
       );
     },
-    ol: ({ node, children, ...props }: any) => {
+    ol: ({ children, ...props }: OlProps) => {
       return (
         <ol className="list-decimal list-outside ml-4" {...props}>
           {children}
         </ol>
       );
     },
-    li: ({ node, children, ...props }: any) => {
+    li: ({ children, ...props }: LiProps) => {
       return (
         <li className="py-1" {...props}>
           {children}
         </li>
       );
     },
-    ul: ({ node, children, ...props }: any) => {
+    ul: ({ children, ...props }: UlProps) => {
       return (
         <ul className="list-decimal list-outside ml-4" {...props}>
           {children}
         </ul>
       );
     },
-    strong: ({ node, children, ...props }: any) => {
+    strong: ({ children, ...props }: StrongProps) => {
       return (
         <span className="font-semibold" {...props}>
           {children}
         </span>
       );
     },
-    a: ({ node, children, ...props }: any) => {
+    a: ({ children, ...props }: AnchorProps) => {
       return (
         <a
           className="text-blue-500 hover:underline"
@@ -62,42 +77,42 @@ const NonMemoizedMarkdown = ({ children }: { children: string }) => {
         </a>
       );
     },
-    h1: ({ node, children, ...props }: any) => {
+    h1: ({ children, ...props }: HeadingProps) => {
       return (
         <h1 className="text-3xl font-semibold mt-6 mb-2" {...props}>
           {children}
         </h1>
       );
     },
-    h2: ({ node, children, ...props }: any) => {
+    h2: ({ children, ...props }: HeadingProps) => {
       return (
         <h2 className="text-2xl font-semibold mt-6 mb-2" {...props}>
           {children}
         </h2>
       );
     },
-    h3: ({ node, children, ...props }: any) => {
+    h3: ({ children, ...props }: HeadingProps) => {
       return (
         <h3 className="text-xl font-semibold mt-6 mb-2" {...props}>
           {children}
         </h3>
       );
     },
-    h4: ({ node, children, ...props }: any) => {
+    h4: ({ children, ...props }: HeadingProps) => {
       return (
         <h4 className="text-lg font-semibold mt-6 mb-2" {...props}>
           {children}
         </h4>
       );
     },
-    h5: ({ node, children, ...props }: any) => {
+    h5: ({ children, ...props }: HeadingProps) => {
       return (
         <h5 className="text-base font-semibold mt-6 mb-2" {...props}>
           {children}
         </h5>
       );
     },
-    h6: ({ node, children, ...props }: any) => {
+    h6: ({ children, ...props }: HeadingProps) => {
       return (
         <h6 className="text-sm font-semibold mt-6 mb-2" {...props}>
           {children}

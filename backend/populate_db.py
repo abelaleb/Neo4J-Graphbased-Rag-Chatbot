@@ -11,15 +11,18 @@ load_dotenv(override=True)
 NEO4J_URI = os.getenv("NEO4J_URI")
 NEO4J_USERNAME = os.getenv("NEO4J_USERNAME")
 NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD")
-BALLDONTLIE_API_KEY = os.getenv("BALLDONTLIE_API_KEY") # Optional: Get free key from balldontlie.io for better limits
+# Optional: Get free key from balldontlie.io for better limits
+BALLDONTLIE_API_KEY = os.getenv("BALLDONTLIE_API_KEY")
 
 # API Endpoints
 API_URL = "https://api.balldontlie.io/v1"
 HEADERS = {"Authorization": BALLDONTLIE_API_KEY} if BALLDONTLIE_API_KEY else {}
 
+
 class NBAGraphLoader:
     def __init__(self):
-        self.driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USERNAME, NEO4J_PASSWORD))
+        self.driver = GraphDatabase.driver(
+            NEO4J_URI, auth=(NEO4J_USERNAME, NEO4J_PASSWORD))
 
     def close(self):
         self.driver.close()
@@ -29,13 +32,16 @@ class NBAGraphLoader:
         print("Creating indexes...")
         with self.driver.session() as session:
             # Create unique constraints for Players and Teams
-            session.run("CREATE CONSTRAINT player_id_unique IF NOT EXISTS FOR (p:Player) REQUIRE p.id IS UNIQUE")
-            session.run("CREATE CONSTRAINT team_id_unique IF NOT EXISTS FOR (t:Team) REQUIRE t.id IS UNIQUE")
+            session.run(
+                "CREATE CONSTRAINT player_id_unique IF NOT EXISTS FOR (p:Player) REQUIRE p.id IS UNIQUE")
+            session.run(
+                "CREATE CONSTRAINT team_id_unique IF NOT EXISTS FOR (t:Team) REQUIRE t.id IS UNIQUE")
             # Create fulltext index for fuzzy search (helps the LLM match names)
             try:
-                session.run("CREATE FULLTEXT INDEX playerNames IF NOT EXISTS FOR (n:Player) ON EACH [n.name]")
+                session.run(
+                    "CREATE FULLTEXT INDEX playerNames IF NOT EXISTS FOR (n:Player) ON EACH [n.name]")
             except:
-                pass # Index might already exist
+                pass  # Index might already exist
         print("Schema setup complete.")
 
     def fetch_teams(self):
@@ -67,45 +73,46 @@ class NBAGraphLoader:
             session.run(query, teams=teams)
         print(f"Successfully loaded {len(teams)} teams.")
 
-    def fetch_active_players(self):
-        """Fetches active players page by page."""
-        print("Fetching active players (this may take a moment)...")
+    def fetch_players(self):
+        """Fetches players page by page."""
+        print("Fetching players (this may take a moment)...")
         all_players = []
         page = 1
         while True:
-            # Only fetch active players per page to save time
+            # Only fetch players per page to save time
             url = f"{API_URL}/players?per_page=100&page={page}"
             try:
                 response = requests.get(url, headers=HEADERS)
                 if response.status_code != 200:
                     break
-                
+
                 data = response.json()
                 players = data['data']
-                
+
                 if not players:
                     break
-                
+
                 # Filter for active players only if API supports it, otherwise logic handles it
                 # We simply append all fetched players
                 all_players.extend(players)
-                
+
                 print(f"Fetched page {page}...")
                 page += 1
-                
+
                 # Rate limit safety (free tier is 30 req/min)
                 if not BALLDONTLIE_API_KEY:
-                    time.sleep(2) 
+                    time.sleep(2)
 
                 # Safety break for testing (remove this to fetch ALL thousands of players)
-                if page > 10: 
-                    print("Stopping at 10 pages for demo purposes. Remove limit in code to fetch all.")
+                if page > 10:
+                    print(
+                        "Stopping at 10 pages for demo purposes. Remove limit in code to fetch all.")
                     break
 
             except Exception as e:
                 print(f"Error fetching players: {e}")
                 break
-        
+
         return all_players
 
     def load_players(self, players):
@@ -121,13 +128,14 @@ class NBAGraphLoader:
             player.height = CASE WHEN p.height_feet IS NOT NULL THEN p.height_feet + "'" + p.height_inches + '"' ELSE null END,
             player.weight = p.weight_pounds,
             player.jersey_number = p.jersey_number
+            player.team = p.team_idy
 
         WITH player, p
         WHERE p.team IS NOT NULL
         MATCH (t:Team {id: p.team.id})
         MERGE (player)-[:PLAYS_FOR]->(t)
         """
-        
+
         # Batch processing to prevent memory overload
         batch_size = 500
         with self.driver.session() as session:
@@ -135,24 +143,25 @@ class NBAGraphLoader:
                 batch = players[i:i+batch_size]
                 session.run(query, players=batch)
                 print(f"Processed batch {i} to {i+len(batch)}")
-        
+
         print(f"Successfully loaded {len(players)} players.")
+
 
 if __name__ == "__main__":
     loader = NBAGraphLoader()
     try:
         loader.setup_schema()
-        
+
         # 1. Load Teams
         teams = loader.fetch_teams()
         if teams:
             loader.load_teams(teams)
-        
+
         # 2. Load Players
         players = loader.fetch_active_players()
         if players:
             loader.load_players(players)
-            
+
     finally:
         loader.close()
         print("Database population finished.")
